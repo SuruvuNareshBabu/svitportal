@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          accuracy_percentage: number | null
+          avatar_url: string | null
+          city: string | null
+          created_at: string
+          current_streak: number | null
+          date_of_birth: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          instagram_url: string | null
+          linkedin_url: string | null
+          phone: string | null
+          questions_attempted: number | null
+          questions_solved: number | null
+          state: string | null
+          total_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy_percentage?: number | null
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string
+          current_streak?: number | null
+          date_of_birth?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          questions_attempted?: number | null
+          questions_solved?: number | null
+          state?: string | null
+          total_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy_percentage?: number | null
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string
+          current_streak?: number | null
+          date_of_birth?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          questions_attempted?: number | null
+          questions_solved?: number | null
+          state?: string | null
+          total_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
