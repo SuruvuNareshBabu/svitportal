@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   BookOpen,
@@ -18,6 +18,8 @@ import {
   Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const navItems = [
   { icon: QrCode, label: "Scan QR Code", path: "/scan" },
@@ -39,7 +41,48 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(true);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userInitial, setUserInitial] = useState("U");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Get user profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profile) {
+          setUserName(profile.full_name || user.email?.split("@")[0] || "User");
+          setUserEmail(profile.email || user.email || "");
+          setUserInitial((profile.full_name || user.email || "U")[0].toUpperCase());
+        } else {
+          const name = user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
+          setUserName(name);
+          setUserEmail(user.email || "");
+          setUserInitial(name[0].toUpperCase());
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Error signing out");
+    } else {
+      toast.success("Signed out successfully");
+      navigate("/landing");
+    }
+  };
 
   return (
     <aside
@@ -101,7 +144,7 @@ export function Sidebar({ className }: SidebarProps) {
           >
             <div
               className={cn(
-                "absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform",
+                "absolute top-0.5 w-4 h-4 rounded-full bg-foreground transition-transform",
                 darkMode ? "translate-x-5" : "translate-x-0.5"
               )}
             />
@@ -112,20 +155,24 @@ export function Sidebar({ className }: SidebarProps) {
       {/* User Profile */}
       <div className="p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="avatar-circle h-10 w-10 bg-secondary text-foreground">
-            S
+          <div className="avatar-circle h-10 w-10 bg-gradient-to-br from-primary to-accent text-primary-foreground">
+            {userInitial}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <p className="text-sm font-semibold truncate">SURUVU NARESH BABU</p>
+              <p className="text-sm font-semibold truncate text-foreground">{userName.toUpperCase()}</p>
               <span className="text-primary text-xs">✓</span>
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              nareshbabu6565@gmail.com
+              {userEmail}
             </p>
           </div>
-          <button className="p-2 hover:bg-secondary rounded-lg transition-colors">
-            <LogOut className="h-4 w-4 text-muted-foreground" />
+          <button 
+            onClick={handleLogout}
+            className="p-2 hover:bg-destructive/10 rounded-lg transition-colors group"
+            title="Sign out"
+          >
+            <LogOut className="h-4 w-4 text-muted-foreground group-hover:text-destructive" />
           </button>
         </div>
       </div>
